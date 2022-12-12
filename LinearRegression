@@ -1,0 +1,16 @@
+sample.data <- data.frame(
+  target=c(0.9, 1.8, 2.4, 3.5, 3.9, 4.4, 5.1, 5.6, 6.3),
+  feature=c(1.4, 2.6, 1.0, 3.7, 5.5, 3.2, 3.0, 4.9, 6.3))
+
+sample.data # print the data to the screen in a nice format
+
+## plot a x/y scatter plot with the data
+plot(sample.data$target, sample.data$feature)
+
+## create a "linear model" - that is, do the regression
+sample.regression <- lm(target ~ feature, data=sample.data)
+## generate a summary of the regression
+summary(sample.regression)
+
+## add the regression line to our x/y scatter plot
+abline(sample.regression, col="blue")
