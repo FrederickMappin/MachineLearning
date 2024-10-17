@@ -9,23 +9,28 @@ import numpy as np
 def calculate_statistics(df):
     # Initialize a list to store the statistics for each column
     stats_list = []
+    processed_columns = []
 
     # Iterate through each column in the DataFrame
     for column in df.columns:
-        col_data = df[column].dropna().astype(float)  # Drop NaN values and convert to float
-        mean = col_data.mean()
-        median = col_data.median()
-        mode = col_data.mode().iloc[0] if not col_data.mode().empty else np.nan
-        std_dev = col_data.std()
-        min_val = col_data.min()
-        max_val = col_data.max()
-        skewness = skew(col_data)
+        try:
+            col_data = df[column].dropna().astype(float)  # Drop NaN values and convert to float
+            mean = col_data.mean()
+            median = col_data.median()
+            mode = col_data.mode().iloc[0] if not col_data.mode().empty else np.nan
+            std_dev = col_data.std()
+            min_val = col_data.min()
+            max_val = col_data.max()
+            skewness = skew(col_data)
 
-        # Append the statistics to the list
-        stats_list.append([mean, median, mode, std_dev, min_val, max_val, skewness])
+            # Append the statistics to the list
+            stats_list.append([mean, median, mode, std_dev, min_val, max_val, skewness])
+            processed_columns.append(column)
+        except ValueError:
+            st.warning(f"Column '{column}' contains non-numerical values and will be skipped.")
 
     # Create a DataFrame from the statistics list
-    stats_df = pd.DataFrame(stats_list, columns=['Mean', 'Median', 'Mode', 'Standard Deviation', 'Min', 'Max', 'Skewness'], index=df.columns)
+    stats_df = pd.DataFrame(stats_list, columns=['Mean', 'Median', 'Mode', 'Standard Deviation', 'Min', 'Max', 'Skewness'], index=processed_columns)
 
     return stats_df
 
@@ -45,15 +50,15 @@ def plot_histograms(df, columns_to_plot):
 
     # Iterate through each column in the DataFrame
     for i, column in enumerate(df.columns):
-        numeric_data = df[column].dropna().astype(float)
-        axes[i].hist(numeric_data, bins=10)
-        axes[i].set_title(f'Histogram for {column}')
-        axes[i].set_xlabel('Value')
-        axes[i].set_ylabel('Frequency')
-
-    # Remove any unused subplots
-    for j in range(i + 1, len(axes)):
-        fig.delaxes(axes[j])
+        try:
+            numeric_data = df[column].dropna().astype(float)
+            axes[i].hist(numeric_data, bins=10)
+            axes[i].set_title(f'Histogram for {column}')
+            axes[i].set_xlabel('Value')
+            axes[i].set_ylabel('Frequency')
+        except ValueError:
+            st.warning(f"Column '{column}' contains non-numerical values and will be skipped.")
+            fig.delaxes(axes[i])
 
     plt.tight_layout()
     st.pyplot(fig)
@@ -74,14 +79,14 @@ def plot_boxplots(df, columns_to_plot):
 
     # Iterate through each column in the DataFrame
     for i, column in enumerate(df.columns):
-        numeric_data = df[column].dropna().astype(float)
-        axes[i].boxplot(numeric_data, vert=False)
-        axes[i].set_title(f'Box Plot for {column}')
-        axes[i].set_xlabel('Value')
-
-    # Remove any unused subplots
-    for j in range(i + 1, len(axes)):
-        fig.delaxes(axes[j])
+        try:
+            numeric_data = df[column].dropna().astype(float)
+            axes[i].boxplot(numeric_data, vert=False)
+            axes[i].set_title(f'Box Plot for {column}')
+            axes[i].set_xlabel('Value')
+        except ValueError:
+            st.warning(f"Column '{column}' contains non-numerical values and will be skipped.")
+            fig.delaxes(axes[i])
 
     plt.tight_layout()
     st.pyplot(fig)
@@ -102,15 +107,15 @@ def plot_barplots(df, columns_to_plot):
 
     # Iterate through each column in the DataFrame
     for i, column in enumerate(df.columns):
-        numeric_data = df[column].dropna().astype(float)
-        axes[i].bar(range(len(numeric_data)), numeric_data)
-        axes[i].set_title(f'Bar Plot for {column}')
-        axes[i].set_xlabel('Index')
-        axes[i].set_ylabel('Value')
-
-    # Remove any unused subplots
-    for j in range(i + 1, len(axes)):
-        fig.delaxes(axes[j])
+        try:
+            numeric_data = df[column].dropna().astype(float)
+            axes[i].bar(range(len(numeric_data)), numeric_data)
+            axes[i].set_title(f'Bar Plot for {column}')
+            axes[i].set_xlabel('Index')
+            axes[i].set_ylabel('Value')
+        except ValueError:
+            st.warning(f"Column '{column}' contains non-numerical values and will be skipped.")
+            fig.delaxes(axes[i])
 
     plt.tight_layout()
     st.pyplot(fig)
@@ -128,7 +133,7 @@ st.title("Data Visualization and Statistics App")
 uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
 
 if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file, index_col=0)
+    df = pd.read_csv(uploaded_file)
     st.write("Data Preview:")
     st.write(df.head())
 
