@@ -127,6 +127,42 @@ def plot_missing_map(df):
     ax.patch.set_facecolor('gray')  # Set the background color to gray
     st.pyplot(fig)
 
+def plot_correlation_matrix(df):
+    # Drop columns with non-numerical values
+    df_numeric = df.select_dtypes(include=[np.number]).dropna(axis=1, how='any')
+
+    # Calculate the correlation matrix
+    correlations = df_numeric.corr()
+
+    # Plot the correlation matrix
+    fig, ax = plt.subplots(figsize=(10, 8))
+    cax = ax.matshow(correlations, vmin=-1, vmax=1)
+    fig.colorbar(cax)
+    ticks = np.arange(0, len(df_numeric.columns), 1)
+    ax.set_xticks(ticks)
+    ax.set_yticks(ticks)
+    ax.set_xticklabels(df_numeric.columns, rotation=90)
+    ax.set_yticklabels(df_numeric.columns)
+    plt.title('Correlation Matrix')
+    st.pyplot(fig)
+
+def plot_scatter_matrix(df):
+    # Drop columns with non-numerical values
+    df_numeric = df.select_dtypes(include=[np.number]).dropna(axis=1, how='any')
+
+    # Create a figure and axes
+    fig, ax = plt.subplots(figsize=(15, 15))
+
+    # Plot the scatter plot matrix
+    pd.plotting.scatter_matrix(df_numeric, ax=ax)
+    plt.title('Scatter Plot Matrix')
+
+    # Pass the figure to st.pyplot
+    st.pyplot(fig)
+
+
+
+
 # Streamlit app
 st.title("Data Visualization and Statistics App")
 
@@ -159,3 +195,9 @@ if uploaded_file is not None:
         stats_df = calculate_statistics(df)
         st.write("Statistics:")
         st.write(stats_df)
+
+    if st.button("Plot Correlation Matrix"):
+        plot_correlation_matrix(df)
+
+    if st.button("Plot Scatter Matrix"):
+        plot_scatter_matrix(df)
